@@ -1,32 +1,22 @@
 const express = require('express');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-require('dotenv').config();
-
+const auth = require('./routes/auth');
 const app = express();
+const passport = require('passport');
 
-passport.use(new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/auth/google/callback"
-    }, (accessToken, refreshToken, profile, cb) => console.log(profile)
-));
+app.use(passport.initialize());
+
+
+require('./db');
+require('./services/passport');
+
 
 app.get("/", (req, res) => {
     res.send({
         hello: "world"
     });
 });
+app.use("/auth", auth);
 
-app.get("/auth/google", passport.authenticate('google', {
-    scope: ['profile', 'email']
-}));
-
-app.get(
-    "/auth/google/callback", 
-    passport.authenticate('google')
-);
 
 const port = process.env.PORT || 3000;
-
 app.listen(port, () => console.log("Server is up and running"));
